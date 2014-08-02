@@ -24,48 +24,82 @@ public class HuffmanEncodingTest{
     
     
     /**
-     * Tests our main method which will be implemented from commandLine
+     * Tests our main method with encode
      */
     @Test
     public void firstMainTest() {
     	System.out.println("testing main**********************1");
         String action = "encode";
-    	String name = "TheAdventuresOfSherlockHolmes.txt";
-    	String newname = "reallyweirdglen.txt";
+    	String name = "Kaleidoscope.txt";
+    	String newname = "KaleEncode1.txt";
         String[] stringArray = {action, name, newname};
         HuffmanEncoding.main(stringArray);	
     } 
     
-    
-   // @Test
+   
+    /**
+     * Tests our main method with encode2
+     */
+   @Test
     public void secondMainTest() {
     	System.out.println("testing main**********************2");
-        String action = "decode";
-    	String name = "RandomTextination.txt";
-    	String newname = "RandomDecodenation.txt";
-        String[] stringArray = {action, name, newname};
+        String action = "encode2";
+    	String name = "Kaleidoscope.txt";
+    	String newname = "KaleEncode2.txt";
+    	String num = "15";
+        String[] stringArray = {action, name, newname, num};
         HuffmanEncoding.main(stringArray);	
     } 
     
-    
-    
-    //@Test
+   /**
+    * Tests our main method with decode from a file encoded with encode
+    */
+   @Test
+   public void thirdMainTest() {
+   	System.out.println("testing main**********************3");
+       String action = "decode";
+   	String name = "KaleEncode1.txt";
+   	String newname = "KaleDecoded1.txt";
+       String[] stringArray = {action, name, newname};
+       HuffmanEncoding.main(stringArray);	
+   } 
+   
+   /**
+    * Tests our main method with decode from a file encoded with encode2
+    */
+   @Test
+   public void fourthMainTest() {
+   	System.out.println("testing main**********************4");
+       String action = "decode";
+   	String name = "KaleEncode2.txt";
+   	String newname = "KaleDecoded2.txt";
+       String[] stringArray = {action, name, newname};
+       HuffmanEncoding.main(stringArray);	
+   } 
+   
+   
+   /**
+    * Tests our main method to encode a JPEG
+    */
+    @Test
     public void hangInEncode() {
-    	System.out.println("testing main**********************1");
+    	System.out.println("testing main**********************5");
         String action = "encode";
     	String name = "HangInThere.jpg";
-    	String newname = "HangInThereEncoded.txt";
+    	String newname = "HangInThereEncoded1.huffman";
         String[] stringArray = {action, name, newname};
         HuffmanEncoding.main(stringArray);	
     } 
     
-    
-    //@Test
+    /**
+     * Tests our main method to decode JPEG
+     */
+    @Test
     public void hangInDecode() {
-    	System.out.println("testing main**********************2");
+    	System.out.println("testing main**********************6");
         String action = "decode";
-    	String name = "HangInThere.jpg.huffman";
-    	String newname = "HangInThere2.jpg";
+    	String name = "HangInThereEncoded1.huffman";
+    	String newname = "meow.jpg";
         String[] stringArray = {action, name, newname};
         HuffmanEncoding.main(stringArray);	
     }
@@ -82,7 +116,7 @@ public class HuffmanEncodingTest{
     
     
     
-    @Test
+    //@Test
     public void testJoey() {
     	System.out.println("testing main**********************2");
         String action = "decode";

@@ -67,7 +67,7 @@ public class HuffmanEncoding {
         elapse = end - start;
         seconds = elapse/1000;
         minutes = seconds/60;
-        System.out.println("encode complete at "+minutes+":"+(seconds%60));
+        System.out.println("program complete at "+minutes+":"+(seconds%60));
         
     }
 
@@ -193,10 +193,10 @@ public class HuffmanEncoding {
                 String value = codeDict.get(key);
                 bw.write(key + "," + value);
                 bw.newLine();
-                System.out.println(key+","+value);
+                //System.out.println(key+","+value);
             }
             
-            System.out.println("CODEMAP LENGTH IS: " + count);
+            //System.out.println("CODEMAP LENGTH IS: " + count);
 
             // write the separation line
             bw.newLine();
@@ -204,7 +204,7 @@ public class HuffmanEncoding {
             
             //bw.write(encodeHelper(oldFileName));
             StringBuilder fromCodehelper = encodeHelper(oldFileName);
-            System.out.println("glen is tired");
+           // System.out.println("glen is tired");
             // pad to the fromCodehelper to be multiple of 8
             if(fromCodehelper.length() % 8 != 0){
                 
@@ -213,9 +213,9 @@ public class HuffmanEncoding {
                 for(int i=0; i<change; i++){
                     fromCodehelper = fromCodehelper.append("0");
                 }
-                System.out.println("current length " + fromCodehelper.length());
+                //System.out.println("current length " + fromCodehelper.length());
             }
-            System.out.println("fromCodehelper:[" + fromCodehelper + "]");
+           // System.out.println("fromCodehelper:[" + fromCodehelper + "]");
             String fromCodehelperString = fromCodehelper.toString();
             // append to the newFileName with the fromCodehelper in binary
             FileOutputHelper.writeBinStrToFile(fromCodehelperString, newFileName);
@@ -316,13 +316,13 @@ public class HuffmanEncoding {
     	String newFileName = this.dest;
     	
     	try{
-    		System.out.println("DECODING NOW");
+    		//System.out.println("DECODING NOW");
     		File f1 = new File(oldFileName);
     		File f2 = new File(newFileName);
     		
     		if(!f2.exists()){
     			f2.createNewFile();
-    			System.out.println("making new file");
+    			//System.out.println("making new file");
     		}
     		
     		// Reader to read the old file
@@ -366,7 +366,7 @@ public class HuffmanEncoding {
 	       FileOutputHelper.writeBinStrToFile(finalString, newFileName);
     	}
     	catch(Exception e){
-    		System.out.println("decoding isn't working");
+    		//System.out.println("decoding isn't working");
     	}
   }
 
@@ -379,7 +379,7 @@ public class HuffmanEncoding {
      * the ascii value. 
      */
     public void stealCodeDict(BufferedReader br){
-    	System.out.println("STEAL CODE DICT");
+    	//System.out.println("STEAL CODE DICT");
 		try{
 			String currentLine;
 			while((currentLine = br.readLine()).contains(",")){
@@ -530,10 +530,11 @@ public class HuffmanEncoding {
          * check to make sure the huffRoot is not null. 
          */
         public void buildCodeDict(){ 
-            if (huffRoot != null) {
-            	findInTree(huffRoot, ""); 
+            if (huffRoot == null) {
+                throw new IllegalArgumentException("A HuffmanTree hasn't been constructed yet");
+
             }
-            throw new IllegalArgumentException("A HuffmanTree hasn't been constructed yet");
+            findInTree(huffRoot, ""); 
         }
         
         /**
@@ -580,7 +581,7 @@ public class HuffmanEncoding {
        
         public void printCodeQueue() {
             for (String key : codeDict.keySet()) {
-                System.out.println(key + " maps to " + codeDict.get(key));
+                //System.out.println(key + " maps to " + codeDict.get(key));
             }
         }
         
@@ -625,7 +626,6 @@ public class HuffmanEncoding {
             myItem = null;
             myLeft = left;
             myRight = right;
-            ;
         }
         
         public TreeNode(String key, int value) {
