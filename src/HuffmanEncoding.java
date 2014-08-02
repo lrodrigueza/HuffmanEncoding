@@ -41,7 +41,11 @@ public class HuffmanEncoding {
             System.err.println(usage);
             System.exit(0);
         }
-        try {
+        
+        long start, end, elapse, minutes, seconds;
+    	start = System.currentTimeMillis();
+        
+    	try {
             if (args[0].equals("encode")) {
             	HuffmanEncoding myEncode = new HuffmanEncoding(args[1], args[2]);
             	myEncode.encode();
@@ -54,11 +58,17 @@ public class HuffmanEncoding {
             } else {
                 throw new IllegalArgumentException(usage);
             }
-
         }
         catch(Exception e){
             System.err.println(e);
         }
+        
+        end = System.currentTimeMillis();
+        elapse = end - start;
+        seconds = elapse/1000;
+        minutes = seconds/60;
+        System.out.println("encode complete at "+minutes+":"+(seconds%60));
+        
     }
 
     /**
@@ -92,47 +102,57 @@ public class HuffmanEncoding {
         queue = new PriorityQueue<TreeNode>();
     }
     
-    public void buildHuffTree () {
-        if (dict != null) {
-            huffTree.build();
-            return;
-        }
-        throw new IllegalArgumentException("dictionary is empty");
-    }
-    
-    public void printHuffTree() {
-        huffTree.printHuff();
-    }
-    
-    public void buildCodeDict() {
-        if (huffTree != null) {
-            huffTree.buildCodeDict();
-            //hasCodeDict = true;
-            return;
-        }
-        throw new IllegalArgumentException("must Build huffman tree first");
-    }
-    
-    public void printCodeDict() {
-        huffTree.printCode();
-    }
-    
-  //---------------------------------------ENCODE---------------------------------
     
     /**
-     * Read from the fileName char by char.  Translate each char read to its
-     * corresponding Huffman code from the dict, and keep the code in a string.
+     * ---------------------------ENCODE----------------------------------------------
      */
-    public StringBuilder encodeHelper(String fileName) throws IOException{ //converts all the characters to the codeMap
+    
+    /**
+     * This method first calls buildHashMap(target) with the target file which builds the
+     * Character Frequency Dictionary hashMap. Then it calls buildHuffTree() which builds a 
+     * Huffman Tree from the Character Frequency Dictionary (named wordDict) previously 
+     * constructed. Then it calls build CodeDict() to build a Code Dictionary (named Char
+     * dict) from the previously constructed Huffman Tree (named huffTree). Finally, it calls
+     * writeFileCompressed(destination) to compress the original file with the previously
+     * constructed Code Dictionary. 
+     */
+    
+    public void encode() {
+        buildHashMap(this.target);
+        buildHuffTree();        
+        buildCodeDict();        
+        writeFileCompressed(this.dest);
+    }
+
+    /**
+     * This method is essentially the same as above, but instead of Building a Character
+     * Frequency hashMap it builds a Word Frequency HashMap using the word iterator we built,
+     * FileFreqWordsIterator. This iterator is called in buildHashMap2();
+     */
+    public void encode2(){   	
+    	buildHashMap2(this.target);
+    	buildHuffTree();
+    	buildCodeDict();
+        writeFileCompressed(this.dest);
+    }
+    
+    /**
+     * This method reads target file either char-by-char or word-by-word, depending on which
+     * encode method is being called from command line. It translates each char/word to the
+     * corresponding Huffman code from the Code Dictionary and appends it to one large String
+     * of HuffmanCode. 
+     */
+    public StringBuilder encodeHelper(String fileName) throws IOException{ 
     	  StringBuilder output = new StringBuilder(100000);
-          //String output = new String("");
-          if (num == 0 ) {
+          // char-by-char for encode
+    	  if (num == 0 ) {
         	  FileCharIterator iter = new FileCharIterator(fileName);
               while(iter.hasNext()){
                   String nextChar = iter.next();
                   output.append(codeDict.get(nextChar));
               }
-        	  
+        	
+              // word-by-word for encode2
           } else if (num > 0) {
         	  FileFreqWordsIterator iterWord = new FileFreqWordsIterator(fileName, num);
 	            while(iterWord.hasNext()){
@@ -141,54 +161,23 @@ public class HuffmanEncoding {
 	                output.append(codeDict.get(nextChar));
 	            }
           }
-        System.out.println("OUTPUT LENGTH IS " + output.length());
         return (output.append(codeDict.get("EOF")));
         
     }
-    
-    
-    public void encode() {
-
-        // read target and build the dict
-        buildHashMap(this.target);
-            
-        // build huffTree from the dict
-        buildHuffTree();
-            
-        // build codeDict from the huffTree
-        buildCodeDict();
-            
-        writeFileCompressed(this.dest);
-        
-    }
-
-    public void encode2(){
-    	long start, end, elapse, minutes, seconds;
-    	start = System.currentTimeMillis();
-    	
-    	buildHashMap2(this.target);
-    	for (String s : dict.keySet()) {
-    		System.out.println("entry in dict is " +s); 
-    	}
-    	buildHuffTree();
-    	buildCodeDict();
-        writeFileCompressed(this.dest);
-        
-        end = System.currentTimeMillis();
-        elapse = end - start;
-        seconds = elapse/1000;
-        minutes = seconds/60;
-        System.out.println("encode complete at "+minutes+":"+(seconds%60));
-    }
-    
+    /**
+     * This method writes to the target File. It checks if destination file exists, if it doesn't
+     * it creates a new destination file. It first writes the Code Dictionary to the destination
+     * file. It separates the Code Dictionary from the rest by a newLine. It then grabs the 
+     * encoded string from encodeHelper(target) by calling it with the target file name. 
+     * It pads the returned encoded String with zeros until it is a multiple of 8. 
+     * It finally writes the padded encoded String to the destination file. 
+     * 
+     */
     private void writeFileCompressed(String newFileName) {
-
         String oldFileName = this.target;
-
         File f = new File(newFileName);
 
-        try{
-            
+        try{            
             if (!f.exists()) {
                 f.createNewFile();
             }
@@ -236,7 +225,17 @@ public class HuffmanEncoding {
             return;
         }
     }
-
+    
+    
+    /**
+     * ---------------------------DECODE----------------------------------------------
+     */
+    
+    /**
+     * This method decodes a target file to a destination file. 
+     * 
+     */
+    
     private void decode() throws IOException{ //converts all the characters to the codeMap
     	String finalString = "";
     	String oldFileName = this.target;
@@ -261,7 +260,8 @@ public class HuffmanEncoding {
     		stealCodeDict(br);
     		fr.close();
     		
-	        FileCharIterator charIter = new FileCharIterator(oldFileName);
+	        
+    		FileCharIterator charIter = new FileCharIterator(oldFileName);
 
 	        int count = 0;
 	        String newLine = "00001010";
@@ -301,6 +301,12 @@ public class HuffmanEncoding {
   }
 
     
+    /**
+     * This helper method translates a Huffman encoded String back to ascii values by using
+     * the stolen Code Dictionary from an encoded target file. 
+     * @param tempString
+     * @return
+     */
     public StringBuilder decodeHelperGLEN(StringBuilder tempString){
     	String toCheck = new String("");
     	StringBuilder output = new StringBuilder(100000);
@@ -319,6 +325,60 @@ public class HuffmanEncoding {
 	    	}
 	    return output;
 	}
+    
+    
+    
+    
+    
+    /**
+     * Helper Method constructs HuffmanTree Map after a dictionary has been filled
+     */
+    public void buildHuffTree () {
+        if (dict != null) {
+            huffTree.build();
+            return;
+        }
+        throw new IllegalArgumentException("dictionary is empty");
+    }
+    
+    /**
+     * Helper Method prints Huffman Tree 
+     */
+    public void printHuffTree() {
+        huffTree.printHuff();
+    }
+    
+    
+    /**
+     * Helper method builds Code Dictionary using the HuffmanTree.
+     * Since this uses the built Huffman Tree structure, the Code Dictionary
+     * is a method inside of TreeNode class. 
+     */
+    public void buildCodeDict() {
+        if (huffTree != null) {
+            huffTree.buildCodeDict();
+            //hasCodeDict = true;
+            return;
+        }
+        throw new IllegalArgumentException("must Build huffman tree first");
+    }
+    
+    /**
+     * Helper method prints out Code Dictionary. 
+     */
+    public void printCodeDict() {
+        huffTree.printCode();
+    }
+    
+    
+
+    
+    
+    
+    
+
+
+
   
     public String decodeHelper(String toCheck){
     		if(codeDict.get(toCheck) != null){
