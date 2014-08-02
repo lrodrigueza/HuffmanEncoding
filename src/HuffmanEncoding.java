@@ -33,7 +33,6 @@ public class HuffmanEncoding {
     
     /**
      * Main method sets up Huffman Encoding for Encode, Encode2 or Decode 
-     * @param args
      */
     
     public static void main(String[] args){
@@ -81,9 +80,6 @@ public class HuffmanEncoding {
     /**
      * Constructor for Encode 2. Same as above, only sets num=n to  passed in argument
      * for counting n most frequent words. 
-     * @param target
-     * @param dest
-     * @param num
      */
     public HuffmanEncoding (String target, String dest, String num) {
         this.target = target;
