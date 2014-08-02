@@ -226,6 +226,38 @@ public class HuffmanEncoding {
         }
     }
     
+    /**
+     * This encode helper method creates a Char Frequency HashMap for any given file as input
+     * by reading char-by-char and adding each char and its frequency to the wordDict HashMap. 
+     */
+    public void buildHashMap(String inputFileName) {
+        FileCharIterator iter = new FileCharIterator(inputFileName);
+        while(iter.hasNext()){
+            String toRtn = iter.next();
+            if (dict.containsKey(toRtn)){
+                    updateFreq(toRtn);
+            }else{
+                    addChar(toRtn);
+            }
+        }
+
+    }
+    /**
+     * This encode2 helper method creates a Char Frequency HashMap for any given file as input
+     * by reading word-by-word and adding each word and its frequency to the wordDict HashMap. 
+     */
+	public void buildHashMap2(String inputFileName){
+		FileFreqWordsIterator iter = new FileFreqWordsIterator(inputFileName, num);
+	    while(iter.hasNext()){
+	        String toRtn = iter.next();
+	        if (dict.containsKey(toRtn)){
+	                updateFreq(toRtn);
+	        }else{
+	                addChar(toRtn);
+	        }
+	    }
+	}
+		
     
     /**
      * ---------------------------DECODE----------------------------------------------
@@ -259,10 +291,9 @@ public class HuffmanEncoding {
     		// Steal the Code Dictionary, close the br
     		stealCodeDict(br);
     		fr.close();
-    		
-	        
+    			        
+    		// Iterate past the Code Dictionary
     		FileCharIterator charIter = new FileCharIterator(oldFileName);
-
 	        int count = 0;
 	        String newLine = "00001010";
     		String lastInt = charIter.next();
@@ -286,12 +317,9 @@ public class HuffmanEncoding {
 
 	        while(charIter.hasNext()){
     			String toCheck = charIter.next();
-    			//System.out.println("Adding to tempString " + toCheck);
     			tempString.append(toCheck);
             }
-	        
-	      // System.out.println("temp string from String Builder looks like " + tempString);
-    		
+	            		
 	       finalString = decodeHelperGLEN(tempString).toString();
 	       FileOutputHelper.writeBinStrToFile(finalString, newFileName);
     	}
@@ -300,12 +328,37 @@ public class HuffmanEncoding {
     	}
   }
 
+    /**
+     * This helper method steals the Code Dictionary from an Huffman encoded file. It reads
+     * line-by-line given the line contains a ',' character. It splits the line by the ',' 
+     * char into a String array, lineContent. lineContent[0] contains the ascii value, and 
+     * lineContent[1] contains the Huffman Code Value.  
+     * It creates a new Code Dictionary, where the key is the Huffman Code and the value is 
+     * the ascii value. 
+     */
+    public void stealCodeDict(BufferedReader br){
+    	System.out.println("STEAL CODE DICT");
+		try{
+			String currentLine;
+			while((currentLine = br.readLine()).contains(",")){
+				String[] lineContent = currentLine.split("[,]");
+				String ascii = lineContent[0];
+				String huff = lineContent[1];
+				codeDict.put(huff, ascii);
+			}
+		br.close();
+		}
+		catch(IOException e){
+			System.out.println(e);
+			System.out.println("out of bounds???");
+			return;
+		}	
+    }
+   
     
     /**
      * This helper method translates a Huffman encoded String back to ascii values by using
      * the stolen Code Dictionary from an encoded target file. 
-     * @param tempString
-     * @return
      */
     public StringBuilder decodeHelperGLEN(StringBuilder tempString){
     	String toCheck = new String("");
@@ -325,8 +378,6 @@ public class HuffmanEncoding {
 	    	}
 	    return output;
 	}
-    
-    
     
     
     
@@ -373,71 +424,9 @@ public class HuffmanEncoding {
     
 
     
-    
-    
-    
 
-
-
-  
-    public String decodeHelper(String toCheck){
-    		if(codeDict.get(toCheck) != null){
-    			return codeDict.get(toCheck);
-    		}
-	    return toCheck;
-    }
-    
-    public void stealCodeDict(BufferedReader br){
-    	System.out.println("STEAL CODE DICT");
-		try{
-			String currentLine;
-			//boolean commaHere = !currentLine.toLowerCase().contains(",".toLowerCase());
-			//while((currentLine = br.readLine()) != null){
-			while((currentLine = br.readLine()).contains(",")){
-				String[] lineContent = currentLine.split("[,]");
-				String ascii = lineContent[0];
-				String huff = lineContent[1];
-				codeDict.put(huff, ascii);
-			}
-		br.close();
-		}
-		catch(IOException e){
-			System.out.println(e);
-			System.out.println("out of bounds???");
-			return;
-		}	
-    }
-   
            
-    public void buildHashMap(String inputFileName) {
-            //TODO
-            // 1. initialize the iterator
-            // 2. call next, grab character 
-            //         if character in HashMap, update frequency
-            //             else add to HashMap, update freqency
-            FileCharIterator iter = new FileCharIterator(inputFileName);
-            while(iter.hasNext()){
-                String toRtn = iter.next();
-                if (dict.containsKey(toRtn)){
-                        updateFreq(toRtn);
-                }else{
-                        addChar(toRtn);
-                }
-            }
-    
-        }
-    
-    public void buildHashMap2(String inputFileName){
-    	FileFreqWordsIterator iter = new FileFreqWordsIterator(inputFileName, num);
-        while(iter.hasNext()){
-            String toRtn = iter.next();
-            if (dict.containsKey(toRtn)){
-                    updateFreq(toRtn);
-            }else{
-                    addChar(toRtn);
-            }
-        }
-    }
+ 
         private TreeNode findNode (String str, TreeNode t){
             if (t.myItem.equals(str)){
                     return t;
