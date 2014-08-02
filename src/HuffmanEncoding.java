@@ -104,7 +104,7 @@ public class HuffmanEncoding {
     
     
     /**
-     * ---------------------------ENCODE----------------------------------------------
+     * --------------------------- ENCODE ----------------------------------------------
      */
     
     /**
@@ -257,10 +257,52 @@ public class HuffmanEncoding {
 	        }
 	    }
 	}
+	
+    /** This buildHashMap helper method takes in a Char/Word string and adds it to
+     *  the Word/Char Dictionary hashMap. 
+     */
+	public void addChar(String key){
+        dict.put(key, 1);
+        return;
+    }
+    
+	/** This buildHashMap helper method takes in a Char/Word string and updates its frequency in
+     *  the Word/Char Dictionary hashMap. 
+     */
+    public void updateFreq(String c) {
+        int oldValue = dict.get(c);
+        dict.put(c, oldValue+1);
+        return;
+    } 
+	
+    /**
+     * This encode helper method constructs HuffmanTree Map after either a Char or Word Frequency
+     * Dictionary has been created. 
+     */
+    public void buildHuffTree () {
+        if (dict != null) {
+            huffTree.build();
+            return;
+        }
+        throw new IllegalArgumentException("dictionary is empty");
+    }
+    
+    /**
+     * This encode helper method builds Code Dictionary using a built HuffmanTree.
+     * Since this uses the built Huffman Tree structure, the Code Dictionary
+     * is a method inside of TreeNode class. 
+     */
+    public void buildCodeDict() {
+        if (huffTree != null) {
+            huffTree.buildCodeDict();
+            return;
+        }
+        throw new IllegalArgumentException("must Build huffman tree first");
+    }
 		
     
     /**
-     * ---------------------------DECODE----------------------------------------------
+     * --------------------------- DECODE ----------------------------------------------
      */
     
     /**
@@ -381,16 +423,11 @@ public class HuffmanEncoding {
     
     
     
+
     /**
-     * Helper Method constructs HuffmanTree Map after a dictionary has been filled
+     * --------------------------------- TESTING HELPER METHODS----------------------------------- 
      */
-    public void buildHuffTree () {
-        if (dict != null) {
-            huffTree.build();
-            return;
-        }
-        throw new IllegalArgumentException("dictionary is empty");
-    }
+    
     
     /**
      * Helper Method prints Huffman Tree 
@@ -399,21 +436,7 @@ public class HuffmanEncoding {
         huffTree.printHuff();
     }
     
-    
-    /**
-     * Helper method builds Code Dictionary using the HuffmanTree.
-     * Since this uses the built Huffman Tree structure, the Code Dictionary
-     * is a method inside of TreeNode class. 
-     */
-    public void buildCodeDict() {
-        if (huffTree != null) {
-            huffTree.buildCodeDict();
-            //hasCodeDict = true;
-            return;
-        }
-        throw new IllegalArgumentException("must Build huffman tree first");
-    }
-    
+   
     /**
      * Helper method prints out Code Dictionary. 
      */
@@ -421,100 +444,70 @@ public class HuffmanEncoding {
         huffTree.printCode();
     }
     
-    
 
-    
-
-           
- 
-        private TreeNode findNode (String str, TreeNode t){
-            if (t.myItem.equals(str)){
-                    return t;
-            }
-            if (((String) t.myItem).compareTo(str) < 0){
-                    return findNode (str, t.myRight);
-            } else {
-                    return findNode (str, t.myLeft);
-            }
+    private TreeNode findNode (String str, TreeNode t){
+        if (t.myItem.equals(str)){
+                return t;
         }
+        if (((String) t.myItem).compareTo(str) < 0){
+                return findNode (str, t.myRight);
+        } else {
+                return findNode (str, t.myLeft);
+        }
+    }
 
         
-        public HashMap<String,Integer> getHashMap(){
-            return dict;
+    public HashMap<String,Integer> getHashMap(){
+        return dict;
+    }
+         
+    public void printHash(){
+    	System.out.println("PRINTHASH METHOD");
+        String gotThisKey;
+        int freq;
+        Iterator<String> hashIter = dict.keySet().iterator();
+        while (hashIter.hasNext()){
+            gotThisKey = hashIter.next();
+            freq = dict.get(gotThisKey);
+            System.out.println("the key is " + gotThisKey + ", frequency: " + freq);
         }
-        
-        public void addChar(String key){
-            dict.put(key, 1);
-;            return;
-        }
-    
-        public Integer getFreq(String c){
-                //TODO
-            return null;
-        }
-    
-        public void updateFreq(String c) {
-            int oldValue = dict.get(c);
-            dict.put(c, oldValue+1);
-            return;
-        } 
-        
-        public void printHash(){
-        	System.out.println("PRINTHASH METHOD");
-            String gotThisKey;
-            int freq;
-            Iterator<String> hashIter = dict.keySet().iterator();
-            while (hashIter.hasNext()){
-                gotThisKey = hashIter.next();
-                freq = dict.get(gotThisKey);
-                System.out.println("the key is " + gotThisKey + ", frequency: " + freq);
-            }
-            return;
-        }
+        return;
+    }
         
         
     /**
-     * Huffman Tree Methods
-     * @author cs61bl-me
-     *
-     * @param <T>
+     * ---------------------------------- HuffmanTree ----------------------------------------
+     * 
+     * Huffman Tree is a  nested class which is used to create a Huffman Tree. It builds a 
+     * Huffman Tree and also has methods from creating a Code Dictionary from a built instance
+     * of itself. 
      */
         
     protected class HuffmanTree {
         Integer currentMin=0;
         String minKey;
         TreeNode huffRoot;
- 
+        
+        
         /**
-         * magic: 
-         * queue already created
-         * 
-         * for loop to go through entire hashmap and add it to the queue
-         * 
-         * 
-         * grab two min values from queue, deltes from queue
-         * 
-         * merge two min values into one node, and connect via triangle add back to queue
-         * 
-         * repeat until the size is equal to 1
-         * 
-         * now entire tree is built 
-
+         * This encode helper method is called by encode and encode2 to build a Huffman tree
+         * with a build Word/Char Frequency Dictionary. It first iterates through all keys in 
+         * Word/Char Frequency Dictionary and adds each key-val pair to a Priority Queue that
+         * holds Tree Nodes. It then iterate through the Priority Queue, polling the least 2
+         * most frequent Word/Char Tree Nodes. It combines them into a Tree of three nodes, where
+         * each child is the one of the words and the parent is a TreeNode holding their
+         * combined value. It does this iteratively until the entire Huffman Tree is built and is 
+         * the only TreeNode in the Priority Queue. It finally sets huffRoot to the built 
+         * Huffman tree by polling the last and only element from the Priority Queue. 
          */
-        
-        
         public void build() {
             // Building Queue
             for (String key : dict.keySet()) {
-                int val = dict.get(key);
-                
+                int val = dict.get(key);               
                 queue.add(new TreeNode (key, val));
-                
-            }
+            }            
             
             queue.add(new TreeNode( "EOF", 1));
-            
-            // Grabbing min value
             
             while (queue.size() > 1) {
                 TreeNode key1 = queue.poll();
@@ -526,59 +519,32 @@ public class HuffmanEncoding {
                 TreeNode mergeRoot = new TreeNode(combinedVal, key1, key2);
                 
                 queue.add(mergeRoot);      
-            }
-            
-            huffRoot = queue.poll();
-            
+            }       
+            huffRoot = queue.poll();           
         }
-        
-/**    
-    public String searchTree(FileReader fr) throws Exception{
-    	try{
-	    	if (huffRoot != null) {
-	    		return searchTree(fr, huffRoot);
-	    	}
-    	}
-    	catch(Exception e){
-    		throw new IllegalArgumentException();
-    	}
-    	return null;
-    }
-        
-	private String searchTree(FileReader fr, TreeNode t) throws IOException{ //
-		try{
-			if (t.myLeft == null & t.myRight == null) { 
-	    		return t.myItem; 
-	    	}	    
-	    	
-	    	Integer nxtChar = fr.read();
-		    	if (nxtChar == 0) {
-		    		return searchTree(fr, t.myLeft);		
-		    	} 
-    	}
-    	catch(IOException e){
-    		System.out.println(e);
-    	}
-    	
-    	return searchTree(fr, t.myRight);
-    }
-**/
 
-        public void printHuff() {
+        /**
+         * This encode helper method calls Builds the Code Dictionary by calling findInTree 
+         * on the huffRoot of a specific HuffmanTree instance. This is basically an interface
+         * so that the outer class can call findInTree on Huffman Tree's huffRoot. It does a null
+         * check to make sure the huffRoot is not null. 
+         */
+        public void buildCodeDict(){ 
             if (huffRoot != null) {
-            huffRoot.print(0);
+            	findInTree(huffRoot, ""); 
             }
+            throw new IllegalArgumentException("A HuffmanTree hasn't been constructed yet");
         }
-
-        //-----------------------------------------ENCODE---------------------------
         
-        public void buildCodeDict(){  //some sort of iteration that keeps encoding for the size of the hashmap
-            //for each key in the hashmap
-            findInTree(huffRoot, ""); 
-           
-        }
-            
-        //tree traversal, find the node that matches the key
+        /**
+         * This encode helper method is private the Huffman Tree class and can only be called by
+         * the public buildCodeDict() method. It recursively builds a Code Dictionary by doing 
+         * a post order traversal through a built Huffman Tree. It finds paths to each leaf 
+         * in the Huffman Tree. It builds the code through the path; if the path goes down a 
+         * right branch it concatonates a "0" to the code, else a "1" to the code. Once it reaches
+         * a leaf, it puts the constructed code in the Code Dictionary by passing in the leaf's
+         * ascii value as the key and the constructed code as the value. 
+         */
         private void findInTree(TreeNode tNode, String newCode){
            
             if ( tNode.myRight != null){
@@ -588,21 +554,30 @@ public class HuffmanEncoding {
             if(tNode.myLeft != null){
                 findInTree( tNode.myLeft, newCode + "0");    
             }
-            //newCode.concat("X");
+            
             if (tNode.myItem != null) {
                 assignCode(tNode.myItem, newCode);
             }
             return;
                 
         }
-
+        /**
+         * This findInTree helper method places key-value pairs in the Code Dictionary, where the
+         * key is an ascii value and the value is the Huffman Code.
+         */
         private void assignCode(String ascii, String newCode){
-            //System.out.println("assignCode: [code,char]=["+newCode+","+keyChar+"]");
             codeDict.put(ascii, newCode);
         }
         
-        
-         
+        /**
+         * --------------------------- TESTING HELPER METHODS ------------------------------------
+         */
+        public void printHuff() {
+            if (huffRoot != null) {
+            huffRoot.print(0);
+            }
+        }
+       
         public void printCodeQueue() {
             for (String key : codeDict.keySet()) {
                 System.out.println(key + " maps to " + codeDict.get(key));
@@ -618,6 +593,16 @@ public class HuffmanEncoding {
  
     }
     
+    /**
+     * ----------------------------------- TreeNode ---------------------------------------------
+     * 
+     * Private nested class used to implement the Nodes of the HuffmanTree class. This class
+     * implements comparable in order to be able to order Chars/Words by their frequency as is 
+     * required for building the Huffman Tree. 
+     * 
+     * @author laurarodriguez
+     *
+     */
     private class TreeNode implements Comparable<TreeNode> {
         public String myItem;
         public int myValue; 
