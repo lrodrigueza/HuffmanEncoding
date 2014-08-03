@@ -1,6 +1,7 @@
 import static org.junit.Assert.*;
 
 import org.junit.Test;
+
 import java.io.*;
 import java.util.*;
 
@@ -56,7 +57,7 @@ public class ZipperTest {
 	@Test
 	public void testBuildTOC() {
 		System.out.println("****************** 3");
-		Zipper zippity = new Zipper("testFolder", "Compressed.txt");
+		Zipper zippity = new Zipper("testFolder", "meowy");
 		zippity.buildFile();
 		assertTrue(zippity.TOC.toString().contains("testFolder/level1-folder/level2-1.txt"));
 	}
@@ -67,24 +68,27 @@ public class ZipperTest {
 	@Test
 	public void testWriteFile() {
 		System.out.println("****************** 4");
-		Zipper zippity = new Zipper("testFolder", "Compressed.txt");
+		Zipper zippity = new Zipper("testFolder", "Compressed");
 		zippity.buildFile();
 		zippity.writeFile("Compressed.txt");
 	}
 	
+	@Test
+	public void testCompress1File() {
+		System.out.println("****************** 5");
+		Zipper zip = new Zipper("testDir", "testDir.zipper");
+		zip.buildFile();
+		zip.writeFile("testDir.zipper");
+	}
+	
 	
 	//@Test
-	public void testARRF(){
+	public void testArrF(){
 		File blahFile = new File("blah");
 		Zipper zippity = new Zipper("blah", "derp");
 		System.out.println(zippity.getArrF());
 	}
-	
-	public void testContentPath(){
-		//tests the construction of the priority queue
-		// carried out in readFile and readTOC
-		
-	}
+
 	
 	public void testTotalCount(){
 		// updated in processFile
@@ -100,19 +104,86 @@ public class ZipperTest {
 //      HuffmanEncoding.main(stringArray);	
 //    } 
 	
+/** ----------------------- TESTING UNZIP ----------------- **/
+	
 	//@Test
-	public void testZip(){
-		Zipper zippity = new Zipper("blah", "SmallFile.txt");
-		zippity.zip();
+	public void testUnzip0() {
+		System.out.println("****************** unzip0");
+		Zipper zipTest = new Zipper("Compressed.txt", "testUnzip0");
+		
+
+	}
+
+	//@Test
+	public void testUnzip(){
+		System.out.println("****************** unzip1");
+		Zipper zipTest = new Zipper("Compressed.txt", "testUnzip1");
+		zipTest.unzip();
+//		FileWriter fw = new FileWriter(f);
+//		BufferedReader br = new BufferedReader(fw);
+//		zipTest.readTOC(br);
+//		assertTrue(inQ.get(0).isClass().equals(WordEntry));
 	}
 	
-	public void testUnZip(){
-		Zipper zippity = new Zipper("blah", "SmallFile.txt");
-		String dest = "SmallFile.txt";
-		zippity.zip(); // void has new File f
-		zippity.unzip();
+	//@Test
+	public void testUnzip1(){
+		System.out.println("****************** unzip2");
+		Zipper zipTest = new Zipper("testDir.zipper", "testDir.unzipped");
+		
+		try {
+			File f = new File("testDir.zipper");
+			FileReader fr = new FileReader(f);
+			BufferedReader br = new BufferedReader(fr);
+			zipTest.readTOC(br);
+			
+			assertFalse(zipTest.contentPath.isEmpty());
+			
+			zipTest.readFile();
+			
+
+		} catch (IOException e) {}
+			
 	}
+	
+	@Test
+	public void testMakeFile() {
+		System.out.println("****************** makeFile1");
+		Zipper zipTest = new Zipper("testDir.zipper", "testDir.unzipped");
+		StringBuilder sB = new StringBuilder(); 
+		FileCharIterator iter = new FileCharIterator("WordEncodeTest.txt");
+		while(iter.hasNext()) {
+			sB.append(iter.next());
+		}
+		zipTest.makeFile("testMakeFile.temporary", sB);
+		
+	}
+	
+	//@Test 
+	public void testDecodeFile() {
+		System.out.println("****************** decodeFile");
+		Zipper zipTest = new Zipper("testDir.zipper", "testDir.unzipped");
+		File f = new File("tempzo");
+		zipTest.decodeFile(f,"tempzoDecoded");
+		
+	}
+	
+	@Test
+	public void testDecodeTempzo() {
+		String action = "decode";
+        String name = "tempzo";
+        String newname = "tempzoDecoded";
+        String[] stringArray = {action, name, newname};
+        HuffmanEncoding.main(stringArray);   
+	}
+	
+	@Test
+	public void testStealCodeDict() {
+		HuffmanEncoding huff = new HuffmanEncoding();
+	}
+	
 }
+
+
 
 /**
  * Copy all contents into a stringCopy. 
