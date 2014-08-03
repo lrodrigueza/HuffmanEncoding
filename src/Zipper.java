@@ -74,7 +74,7 @@ public class Zipper {
             }
         
         else{
-           // throw new IllegalArgumentException();
+            throw new IllegalArgumentException();
         }
     }
     
@@ -132,6 +132,22 @@ public class Zipper {
      * @param br
      * @param count
      */
+    
+    protected void readTOC(BufferedReader br){
+        try{
+            String line;
+            while(!(line = br.readLine()).equals("")){
+                String[] TOCline = line.split(",");
+                String key = makePath(TOCline[0]);
+                System.out.println("line is " + line);
+                
+                Integer value = Integer.parseInt(TOCline[1]);
+                WordEntry inQ = new WordEntry(key, value);
+                contentPath.add(inQ);
+            }   
+        } catch(IOException e){}
+        return;    
+    }
 
     protected void readFile(){
         FileCharIterator charIter = new FileCharIterator(this.source);
@@ -141,15 +157,10 @@ public class Zipper {
         
         StringBuilder currContent =  new StringBuilder();
 
-
         while(charIter.hasNext()){
     
-            
             currContent.setLength(0);
-            
-            //System.out.println("currCont is " + currContent);
             WordEntry firstFile = contentPath.poll();
-
             WordEntry secondFile = contentPath.peek();
             Integer endHere = 0; 
             
@@ -159,14 +170,11 @@ public class Zipper {
                 continue;
             }
             
-            
             if (secondFile == null) {
                 endHere = 999999;
             } else if(secondFile != null) {
                 endHere = secondFile.value;
             }
-            
-            
             
             while (count < endHere) {
                 if (!charIter.hasNext()){
@@ -177,112 +185,12 @@ public class Zipper {
     			String str = new Character((char) charCode).toString();
     			currContent.append(toRtn);
 
-                
                 count++;
             }
-            
-            //fixShit(currContent);
             makeFile(firstFile.key, currContent);
         }
         return;
     }
-
-    
-    protected String fixShit (StringBuilder flattened) {
-    	File f = new File("flattened.temporary");
-    	try {
-			f.createNewFile();
-			FileWriter fw = new FileWriter(f);
-			
-			String flat = flattened.toString();
-			while (!(flat.length() == 0)) {
-				fw.write(flat.substring(0, 8));
-				flat = flat.substring(8);
-			}
-			fw.close();
-	
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	return f.toString();
-    }
-    
-    protected void flatToBeauty(String fileName) {
-    	StringBuilder sB = new StringBuilder(); 
-		FileCharIterator iter = new FileCharIterator(fileName);
-		
-		boolean lastWasNewLine = false; 
-		while(iter.hasNext()) {
-			
-			String toRtn = iter.next();
-			if (toRtn.equals("00001010") && lastWasNewLine) {
-				break; 
-			} else if (toRtn.equals("00001010")) {
-				lastWasNewLine = true; 
-			} else if (!toRtn.equals("00001010")) {
-				lastWasNewLine = false; 
-			}
-			
-			System.out.println("in char its " + toRtn);
-			
-			int charCode = Integer.parseInt(toRtn, 2);
-			String str = new Character((char) charCode).toString();
-			System.out.println("in reg its " + str);
-
-			sB.append(str);
-		}
-		
-		sB.append("\n");
-		//makeFile("tempBeauty", sB);
-		
-		FileCharIterator iter2 = new FileCharIterator(fileName);
-		int count = 0;
-        String newLine = "00001010";
-		String lastInt = iter2.next();
-
-		
-		
-		// Skip past the dictionary
-		while (count < 2) {
-			if (lastInt.equals(newLine)) {
-				String nextInt = iter2.next();
-				if (lastInt.equals(nextInt)) {
-					count = 2;
-					continue;
-				}
-				
-				lastInt = nextInt;
-			}
-			lastInt = iter2.next();
-		}
-		
-		StringBuilder restOfStuff = new StringBuilder(); 
-		while(iter2.hasNext()) {
-			String toRtn = iter2.next();
-			restOfStuff.append(toRtn);
-		}
-		
-		if (restOfStuff.length() % 8 != 0){
-            
-            int tobeAdded = restOfStuff.length() % 8 ;
-            int change = 8 - tobeAdded;
-            for(int i=0; i<change; i++){
-                restOfStuff = restOfStuff.append("0");
-            }
-            //System.out.println("current length " + fromCodehelper.length());
-        }
-       // System.out.println("fromCodehelper:[" + fromCodehelper + "]");
-        String restString = restOfStuff.toString();
-        // append to the newFileName with the fromCodehelper in binary
-        FileOutputHelper.writeBinStrToFile(restString, "tempzo");
-		
-
-    }
-    
-    
-    
-    
     
     protected void skipTOC(FileCharIterator charIter){
         int count = 0;
@@ -299,11 +207,7 @@ public class Zipper {
                 lastInt = nextInt;
             }
             lastInt = charIter.next();
-            
-            
-
         }
-        
     }
     
     /**
@@ -322,17 +226,12 @@ public class Zipper {
         System.out.println("path is " + path);
         
             File f = new File("tempzo");
-//            f.createNewFile();
-//            FileWriter fw = new FileWriter(f);
-//            BufferedWriter bw = new BufferedWriter(fw);       
-//            bw.write(contents.toString());
-                      
-            //decodeFile(f, path);
-            
             String restString = contents.toString();
+            
             // append to the newFileName with the fromCodehelper in binary
             FileOutputHelper.writeBinStrToFile(restString, "tempzo");
            
+            //calls the main method in HuffmanEncoding to decode each small file
             String action = "decode";
             String name = f.toString();
             String newname = this.dest + "/" + path;
@@ -340,56 +239,8 @@ public class Zipper {
             HuffmanEncoding.main(stringArray); 
             
             f.delete();
-
-//            bw.close();
-//            fw.close(); 
-//            
-        
-        //catch(IOException e){System.err.println("makeFile caught an error");}
-    }
-    
-    /**
-     * This method is called by makeFile. It takes in as argument the filename 
-     * of a file that has been created but is still encoded. It creates an instance 
-     * of the HuffmanEncoding class and passes in as arguments the encoded fileName and
-     * the destination file. 
-     */
-    protected void decodeFile(File f, String destination){
-        destination =  this.dest + "/" + destination;
-        //File d = new File(destination);
-        //d.mkdirs();
-        
-        String action = "decode";
-        String name = f.toString();
-        String newname = destination;
-        String[] stringArray = {action, name, newname};
-        HuffmanEncoding.main(stringArray);    
-        
-        //f.delete(); 
-        
     }
 
-    protected void readTOC(BufferedReader br){
-        try{
-            String line;
-            while(!(line = br.readLine()).equals("")){
-                String[] TOCline = line.split(",");
-                String key = makePath(TOCline[0]);
-                System.out.println("line is " + line);
-                
-                Integer value = Integer.parseInt(TOCline[1]);
-                WordEntry inQ = new WordEntry(key, value);
-                contentPath.add(inQ);
-            }
-            
-//            for (WordEntry w : contentPath) {
-//                System.out.println(w);
-//            }
-            
-        } catch(IOException e){}
-        return;    
-    }
-    
     // implement Priority Queue (key is path, value is byte)
     protected String makePath(String given){
         String path = "";
@@ -510,11 +361,6 @@ public class Zipper {
         File t = new File("temp");
         
         addContents(t);
-        
-        //t.delete(); 
-        
-        //HuffmanEncoding huffEncoder = new HuffmanEncoding(f.toString(), dest);
-        //huffEncoder.encode(); 
         return t; 
     }
         
@@ -531,7 +377,6 @@ public class Zipper {
             }
             contents.append("\n");
             br.close(); fr.close();
-            //System.out.println("contents so far " +contents);
         }
         catch(IOException e){}
         
@@ -569,14 +414,11 @@ public class Zipper {
             FileWriter fw = new FileWriter(f);
             BufferedWriter bw = new BufferedWriter(fw);
             String everything = concatAll().toString();
-            //System.out.println("this is everything " + everything);
-            
             fw.write(everything);
             
             bw.close();
             fw.close();
             
-            //FileOutputHelper.writeBinStrToFile(everything, dest);
         }catch(IOException e){}
     }
 
@@ -588,6 +430,10 @@ public class Zipper {
 
     public ArrayList<File> getArrF(){
         return this.arrF;
+    }
+    
+    public WordEntry getWordEntry(String s, Integer i) {
+    	return new WordEntry(s,i);
     }
 
 }
