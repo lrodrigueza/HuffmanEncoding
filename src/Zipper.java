@@ -21,7 +21,7 @@ public class Zipper {
      */
     public static void main (String[] args){
         String usage = "Usage: java Zipper zip|unzip source destination";
-
+        System.out.println("number of args is " + args.length);
         if (args.length > 3) {
             System.err.println(usage);
             System.exit(0);
