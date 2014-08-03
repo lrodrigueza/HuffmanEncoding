@@ -77,6 +77,8 @@ public class Zipper {
            // throw new IllegalArgumentException();
         }
     }
+    
+    public Zipper() {};
 
     
     /**
@@ -170,18 +172,118 @@ public class Zipper {
                 if (!charIter.hasNext()){
                     break;                    
                 }
-                String Char; 
-                Char = charIter.next(); 
-                currContent.append(Char);
-                //System.out.println(Char);          
+                String toRtn = charIter.next();
+                int charCode = Integer.parseInt(toRtn, 2);
+    			String str = new Character((char) charCode).toString();
+    			currContent.append(toRtn);
+
+                
                 count++;
             }
             
+            //fixShit(currContent);
             makeFile(firstFile.key, currContent);
         }
         return;
     }
 
+    
+    protected String fixShit (StringBuilder flattened) {
+    	File f = new File("flattened.temporary");
+    	try {
+			f.createNewFile();
+			FileWriter fw = new FileWriter(f);
+			
+			String flat = flattened.toString();
+			while (!(flat.length() == 0)) {
+				fw.write(flat.substring(0, 8));
+				flat = flat.substring(8);
+			}
+			fw.close();
+	
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	return f.toString();
+    }
+    
+    protected void flatToBeauty(String fileName) {
+    	StringBuilder sB = new StringBuilder(); 
+		FileCharIterator iter = new FileCharIterator(fileName);
+		
+		boolean lastWasNewLine = false; 
+		while(iter.hasNext()) {
+			
+			String toRtn = iter.next();
+			if (toRtn.equals("00001010") && lastWasNewLine) {
+				break; 
+			} else if (toRtn.equals("00001010")) {
+				lastWasNewLine = true; 
+			} else if (!toRtn.equals("00001010")) {
+				lastWasNewLine = false; 
+			}
+			
+			System.out.println("in char its " + toRtn);
+			
+			int charCode = Integer.parseInt(toRtn, 2);
+			String str = new Character((char) charCode).toString();
+			System.out.println("in reg its " + str);
+
+			sB.append(str);
+		}
+		
+		sB.append("\n");
+		//makeFile("tempBeauty", sB);
+		
+		FileCharIterator iter2 = new FileCharIterator(fileName);
+		int count = 0;
+        String newLine = "00001010";
+		String lastInt = iter2.next();
+
+		
+		
+		// Skip past the dictionary
+		while (count < 2) {
+			if (lastInt.equals(newLine)) {
+				String nextInt = iter2.next();
+				if (lastInt.equals(nextInt)) {
+					count = 2;
+					continue;
+				}
+				
+				lastInt = nextInt;
+			}
+			lastInt = iter2.next();
+		}
+		
+		StringBuilder restOfStuff = new StringBuilder(); 
+		while(iter2.hasNext()) {
+			String toRtn = iter2.next();
+			restOfStuff.append(toRtn);
+		}
+		
+		if (restOfStuff.length() % 8 != 0){
+            
+            int tobeAdded = restOfStuff.length() % 8 ;
+            int change = 8 - tobeAdded;
+            for(int i=0; i<change; i++){
+                restOfStuff = restOfStuff.append("0");
+            }
+            //System.out.println("current length " + fromCodehelper.length());
+        }
+       // System.out.println("fromCodehelper:[" + fromCodehelper + "]");
+        String restString = restOfStuff.toString();
+        // append to the newFileName with the fromCodehelper in binary
+        FileOutputHelper.writeBinStrToFile(restString, "tempzo");
+		
+
+    }
+    
+    
+    
+    
+    
     protected void skipTOC(FileCharIterator charIter){
         int count = 0;
         String newLine = "00001010";
@@ -197,6 +299,8 @@ public class Zipper {
                 lastInt = nextInt;
             }
             lastInt = charIter.next();
+            
+            
 
         }
         
@@ -216,44 +320,32 @@ public class Zipper {
     protected void makeFile(String path, StringBuilder contents){
         System.out.println("contents in there " + contents);
         System.out.println("path is " + path);
-        try{
+        
             File f = new File("tempzo");
-            f.createNewFile();
-            FileWriter fw = new FileWriter(f);
-            fw.write(contents.toString());
+//            f.createNewFile();
+//            FileWriter fw = new FileWriter(f);
+//            BufferedWriter bw = new BufferedWriter(fw);       
+//            bw.write(contents.toString());
+                      
+            //decodeFile(f, path);
             
-//            System.out.println("contents length is " + contents.toString().length());
-//            if(contents.length() % 8 != 0){
-//                
-//                int tobeAdded = contents.length() % 8 ;
-//                int change = 8 - tobeAdded;
-//                for(int i=0; i<change; i++){
-//                    contents = contents.append("0");
-//                }
-//                System.out.println("mod better be zero " + contents.length()%8);
-//            }
-           // System.out.println("fromCodehelper:[" + fromCodehelper + "]");
+            String restString = contents.toString();
+            // append to the newFileName with the fromCodehelper in binary
+            FileOutputHelper.writeBinStrToFile(restString, "tempzo");
+           
+            String action = "decode";
+            String name = f.toString();
+            String newname = this.dest + "/" + path;
+            String[] stringArray = {action, name, newname};
+            HuffmanEncoding.main(stringArray); 
             
-            //String contentsFixed = contents.toString();
-            
-            
-            //FileOutputHelper.writeBinStrToFile(contentsFixed, "temp");
+            f.delete();
 
+//            bw.close();
+//            fw.close(); 
 //            
-//            String action = "decode";
-//            String name = f.toString();
-//            String newname = this.dest + "/" + path;
-//            String[] stringArray = {action, name, newname};
-//            HuffmanEncoding.main(stringArray);  
-            
-            //f.delete();
-            
-            //fw.write("i'm so happy!!!!!");
-            fw.close();
-            decodeFile(f, path);
-            
-        }
-        catch(IOException e){System.err.println("makeFile caught an error");}
+        
+        //catch(IOException e){System.err.println("makeFile caught an error");}
     }
     
     /**

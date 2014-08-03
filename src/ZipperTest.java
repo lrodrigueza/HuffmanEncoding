@@ -106,10 +106,11 @@ public class ZipperTest {
 	
 /** ----------------------- TESTING UNZIP ----------------- **/
 	
-	//@Test
+	@Test
 	public void testUnzip0() {
 		System.out.println("****************** unzip0");
 		Zipper zipTest = new Zipper("Compressed.txt", "testUnzip0");
+		zipTest.unzip();
 		
 
 	}
@@ -145,16 +146,113 @@ public class ZipperTest {
 			
 	}
 	
-	@Test
+	//@Test
 	public void testMakeFile() {
 		System.out.println("****************** makeFile1");
 		Zipper zipTest = new Zipper("testDir.zipper", "testDir.unzipped");
 		StringBuilder sB = new StringBuilder(); 
 		FileCharIterator iter = new FileCharIterator("WordEncodeTest.txt");
+		
+		boolean lastWasNewLine = false; 
 		while(iter.hasNext()) {
-			sB.append(iter.next());
+			
+			String toRtn = iter.next();
+			if (toRtn.equals("00001010") && lastWasNewLine) {
+				break; 
+			} else if (toRtn.equals("00001010")) {
+				lastWasNewLine = true; 
+			} else if (!toRtn.equals("00001010")) {
+				lastWasNewLine = false; 
+			}
+			
+			System.out.println("in char its " + toRtn);
+			
+			int charCode = Integer.parseInt(toRtn, 2);
+			String str = new Character((char) charCode).toString();
+			System.out.println("in reg its " + str);
+
+			sB.append(str);
 		}
+		
+		sB.append("\n");
 		zipTest.makeFile("testMakeFile.temporary", sB);
+		
+		FileCharIterator iter2 = new FileCharIterator("WordEncodeTest.txt");
+		int count = 0;
+        String newLine = "00001010";
+		String lastInt = iter2.next();
+
+		
+		
+		// Skip past the dictionary
+		while (count < 2) {
+			if (lastInt.equals(newLine)) {
+				String nextInt = iter2.next();
+				if (lastInt.equals(nextInt)) {
+					count = 2;
+					continue;
+				}
+				
+				lastInt = nextInt;
+			}
+			lastInt = iter2.next();
+		}
+		
+		StringBuilder restOfStuff = new StringBuilder(); 
+		while(iter2.hasNext()) {
+			String toRtn = iter2.next();
+			restOfStuff.append(toRtn);
+		}
+		
+		if (restOfStuff.length() % 8 != 0){
+            
+            int tobeAdded = restOfStuff.length() % 8 ;
+            int change = 8 - tobeAdded;
+            for(int i=0; i<change; i++){
+                restOfStuff = restOfStuff.append("0");
+            }
+            //System.out.println("current length " + fromCodehelper.length());
+        }
+       // System.out.println("fromCodehelper:[" + fromCodehelper + "]");
+        String restString = restOfStuff.toString();
+        // append to the newFileName with the fromCodehelper in binary
+        FileOutputHelper.writeBinStrToFile(restString, "tempzo");
+		
+		
+		
+		
+	}
+	
+	
+	//@Test
+	public void testFixShit(){
+		System.out.println("****************** fixShit");
+		Zipper zipTest = new Zipper("testDir.zipper", "testDir.unzipped");
+		StringBuilder sB = new StringBuilder();
+		
+		FileCharIterator it = new FileCharIterator("WordEncodeTest.txt");
+		while(it.hasNext()) {
+			sB.append(it.next());
+		}
+		zipTest.fixShit(sB);
+		
+	}
+	
+	//@Test
+	public void flattenedToBeauty() {
+		System.out.println("****************** flattBeauty");
+		Zipper zipTest = new Zipper();
+		StringBuilder sB = new StringBuilder();
+		
+		FileCharIterator it = new FileCharIterator("WordEncodeTest.txt");
+		while(it.hasNext()) {
+			sB.append(it.next());
+		}
+		
+		//String flatFile = zipTest.fixShit(sB);
+		
+		zipTest.fixShit(sB);
+		zipTest.flatToBeauty("flattened.temporary");
 		
 	}
 	
@@ -167,7 +265,7 @@ public class ZipperTest {
 		
 	}
 	
-	@Test
+	//@Test
 	public void testDecodeTempzo() {
 		String action = "decode";
         String name = "tempzo";
@@ -176,9 +274,56 @@ public class ZipperTest {
         HuffmanEncoding.main(stringArray);   
 	}
 	
-	@Test
+	//@Test
 	public void testStealCodeDict() {
-		HuffmanEncoding huff = new HuffmanEncoding();
+		System.out.println("****************** stealTest");
+
+		HuffmanEncoding huff = new HuffmanEncoding("tempzo", "tempzo.unzipped");
+		try {
+			File f = new File("tempzo");
+			FileReader fr = new FileReader("tempzo");
+			BufferedReader br = new BufferedReader(fr);
+			
+			huff.stealCodeDict(br);
+			
+			assertTrue(huff.codeDict.isEmpty());
+			
+		} catch (IOException e) {}
+	}
+	
+	//@Test 
+	public void testInfiniteWHile() {
+		System.out.println("****************** WHileTest");
+		
+		// Iterate past the Code Dictionary
+		FileCharIterator charIter = new FileCharIterator("tempzo");
+        int count = 0;
+        String newLine = "00001010";
+		String lastInt = charIter.next();
+
+		// Skip past the dictionary
+		while (count < 2) {
+			if (lastInt.equals(newLine)) {
+				String nextInt = charIter.next();
+				if (lastInt.equals(nextInt)) {
+					count = 2;
+					System.out.println("foudn two newlines");
+					continue;
+				}
+				
+				lastInt = nextInt;
+			}
+			lastInt = charIter.next();
+		}
+		
+		
+	}
+	
+	@Test
+	public void testReadFile4() {
+		System.out.println("****************** unzip4");
+		Zipper zipTest = new Zipper("testDir.zipper", "testUnzip1");
+		zipTest.unzip(); 
 	}
 	
 }
