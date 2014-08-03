@@ -30,7 +30,6 @@ public class HuffmanEncoding {
     private String target;
     private String dest;
     private int num;
-    
     /**
      * Main method sets up Huffman Encoding for Encode, Encode2 or Decode 
      */
@@ -51,7 +50,8 @@ public class HuffmanEncoding {
             	myEncode.encode();
             } else if (args[0].equals("decode")) {
             	HuffmanEncoding myEncode = new HuffmanEncoding(args[1], args[2]);
-            	myEncode.decode();
+            	StringBuilder sb = myEncode.decode();
+            	myEncode.writeDecoded(sb);
             } else if (args[0].equals("encode2")) {
             	HuffmanEncoding myEncode = new HuffmanEncoding(args[1], args[2], args[3]);
             	myEncode.encode2();
@@ -310,8 +310,9 @@ public class HuffmanEncoding {
      * 
      */
     
-    private void decode() throws IOException{ //converts all the characters to the codeMap
-    	String finalString = "";
+    protected StringBuilder decode() throws IOException{ //converts all the characters to the codeMap
+    	//String finalString = "";
+    	StringBuilder sb = new StringBuilder();
     	String oldFileName = this.target;
     	String newFileName = this.dest;
     	
@@ -362,13 +363,20 @@ public class HuffmanEncoding {
     			tempString.append(toCheck);
             }
 	            		
-	       finalString = decodeHelperGLEN(tempString).toString();
-	       FileOutputHelper.writeBinStrToFile(finalString, newFileName);
+	       sb = decodeHelperGLEN(tempString);
+	       
     	}
     	catch(Exception e){
     		//System.out.println("decoding isn't working");
     	}
+    	return sb;
   }
+    
+    private void writeDecoded(StringBuilder sb){
+    	String newFileName = this.dest;
+    	String finalString = sb.toString();
+    	FileOutputHelper.writeBinStrToFile(finalString, newFileName);
+    }
 
     /**
      * This helper method steals the Code Dictionary from an Huffman encoded file. It reads

@@ -367,6 +367,7 @@ The small boy on the country road looked up and screamed. “Look, Mom, look! A 
 The blazing white star fell down the sky of dusk in Illinois.
 
 “Make a wish,” said his mother. “Make a wish.”
+<<<<<<< HEAD
 Kaleidoscope by Ray Bradbury
 
 THE first concussion cut the rocket up the side with a giant can opener. The men were thrown into
@@ -1474,3 +1475,5 @@ The small boy on the country road looked up and screamed. “Look, Mom, look! A 
 The blazing white star fell down the sky of dusk in Illinois.
 
 “Make a wish,” said his mother. “Make a wish.”
+=======
+>>>>>>> dda89c779f5d171de597d222af3ff16d6bad630f
