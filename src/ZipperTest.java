@@ -127,14 +127,14 @@ public class ZipperTest {
 		zippity.unzip();
 	}
 	
-	@Test
+	//@Test
 	public void testZipLayers() {
 		System.out.println("****************** zip4");
 		Zipper zippity = new Zipper("testFolder2", "lisaRequest");
 		zippity.zip();
 	}
 	
-	//@Test
+	@Test
 	public void testUnzipLayers() {
 		System.out.println("****************** zip4");
 		Zipper zippity = new Zipper("lisaRequest", "food");

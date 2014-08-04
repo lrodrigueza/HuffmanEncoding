@@ -158,19 +158,29 @@ public class Zipper {
         StringBuilder currContent =  new StringBuilder();
 
         while(charIter.hasNext()){
-    
             currContent.setLength(0);
             WordEntry firstFile = contentPath.poll();
             WordEntry secondFile = contentPath.peek();
             Integer endHere = 0; 
             
             if(firstFile.value == -1) {
-                File f = new File(this.dest+ "/" + firstFile.key);
+            	File fu = new File(firstFile.key);
+            	if(fu.isDirectory()){
+            		System.out.println("It exists!");
+                	   File temp[] = fu.listFiles();
+                	   for (File fo : temp) {
+                		   fo.delete();
+                	   }
+                	   if(fu.list().length==0){
+                		   fu.delete();
+                		   }
+            	}
+            	File f = new File(this.dest+ "/" + firstFile.key);
                 f.mkdirs();
-                continue;
             }
             
-            if (secondFile == null) {
+            else{
+            	if (secondFile == null) {
                 endHere = 999999;
             } else if(secondFile != null) {
                 endHere = secondFile.value;
@@ -180,10 +190,12 @@ public class Zipper {
                 if (!charIter.hasNext()){
                     break;                    
                 }
-                String toRtn = charIter.next();
+                currContent.append(charIter.next());
                 count++;
-            }
+            	}
+            
             makeFile(firstFile.key, currContent);
+            }
         }
         return;
     }
@@ -217,29 +229,31 @@ public class Zipper {
      * @param path
      * @param contents
      */
-    protected void makeFile(String path, StringBuilder contents){
-        System.out.println("contents in there " + contents);
+    protected void makeFile(String path, StringBuilder stuff){
+        System.out.println("contents in there " + stuff);
         System.out.println("path is " + path);
         
-            try {
-        	File f = new File("tempZip");
-            f.createNewFile();
-            String restString = contents.toString();
-            
-            // append to the newFileName with the fromCodehelper in binary
-            FileOutputHelper.writeBinStrToFile(restString, "tempZip");
-           
-            //calls the main method in HuffmanEncoding to decode each small file
-            String action = "decode";
-            String name = f.toString();
-            String newname = this.dest + "/" + path;
-            String[] stringArray = {action, name, newname};
-            HuffmanEncoding.main(stringArray); 
-            
-            f.delete();
-            } catch (IOException e) {}
-            
-    }
+        
+    	//else{
+        try {
+    	File f = new File("tempZip");
+        f.createNewFile();
+        String restString = stuff.toString();
+        
+        // append to the newFileName with the fromCodehelper in binary
+        FileOutputHelper2.writeBinStrToFile(restString, "tempZip");
+       
+        //calls the main method in HuffmanEncoding to decode each small file
+        String action = "decode";
+        String name = f.toString();
+        String newname = this.dest + "/" + path;
+        String[] stringArray = {action, name, newname};
+        HuffmanEncoding.main(stringArray); 
+        
+        f.delete();
+        } catch (IOException e) {}
+    	} 
+    //}
 
     // implement Priority Queue (key is path, value is byte)
     protected String makePath(String given){
@@ -393,7 +407,6 @@ public class Zipper {
             br.close(); fr.close();
         }
         catch(IOException e){}
-        
     }
     
     public ArrayList<File> makeDir(File source){
@@ -413,20 +426,21 @@ public class Zipper {
     //adds the table of contents and the rest of the words together
     public StringBuilder concatAll(){
         TOC.append("\n");
-         System.out.println("contents are " + contents);
+         System.out.println("CONTENTS ARE " + contents);
          TOC.append(contents);
          return TOC;
     }
     
     public void writeFile(String dest){
+    	System.out.println("writing now");
         try{
-        	File f1 = new File(dest);
+        	File f1 = new File(this.dest);
             if (!f1.exists()) {
                 f1.createNewFile();
             }
-            
             FileWriter fw1 = new FileWriter(f1);
             String everything = concatAll().toString();
+            System.out.println(everything);
             fw1.write(everything);
             fw1.close();
             
@@ -446,5 +460,36 @@ public class Zipper {
     public WordEntry getWordEntry(String s, Integer i) {
     	return new WordEntry(s,i);
     }
+    
+    private static class FileOutputHelper2 {
 
+        // Length of outputStr must be multiple of 8;
+        private static void writeBinStrToFile(String outputStr, String outputFileName) {
+        	
+            int strLen = outputStr.length();
+            if (strLen % 8 != 0) {
+                System.err
+                        .printf("Length of outputStr must a multiple of 8! Tried to write binary string: %s\n",
+                                outputStr);
+                System.exit(1);
+            }
+
+            byte[] toWrite = new byte[strLen / 8];
+            for (int i = 0; i < outputStr.length() / 8; i++) {
+                toWrite[i] = (byte) Integer.parseInt(
+                        outputStr.substring(i * 8, (i + 1) * 8), 2);
+            }
+
+            FileOutputStream output;
+            try {
+                output = new FileOutputStream(outputFileName, false);
+                output.write(toWrite);
+                output.close();
+            } catch (FileNotFoundException e) {
+                System.err.printf("Can't find file %s", outputFileName);
+            } catch (IOException e) {
+                System.err.println("Error with writing to output file");
+            }
+        }
+    }
 }
