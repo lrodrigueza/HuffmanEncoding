@@ -13,7 +13,6 @@ public class ZipperTest {
 	/** ------------------------ test constructor ---------------*/
 	//@Test
 	public void testConstructor1() {
-		System.out.println("****************** constructor1");
 		Zipper zipTest = new Zipper("testFolder", "testCompress");
 		StringBuilder toComp = new StringBuilder();
 		toComp.append("testFolder");
@@ -30,7 +29,6 @@ public class ZipperTest {
 	 */
 	//@Test
 	public void testConstructor2() {
-		System.out.println("****************** 2");
 		Zipper zipTest = new Zipper("FileToUnzip.txt", "UnZippedFolder");
 		assertTrue(zipTest.TOC.toString().contains("FileToUnzip"));
 	}
@@ -44,10 +42,10 @@ public class ZipperTest {
 	 */
 	@Test
 	public void testBuildTOC() {
-		System.out.println("****************** 3");
 		Zipper zippity = new Zipper("testFolder", "whatsMyToC");
 		zippity.buildFile();
 		zippity.buildTOC();
+		System.out.println(zippity.TOC);
 		assertTrue(zippity.TOC.toString().contains("testFolder/level1-folder/"));
 		assertTrue(zippity.TOC.toString().contains("testFolder/,-1"));
 		assertTrue(zippity.TOC.toString().contains("estFolder/level1-folder/level2-folder"));
@@ -55,10 +53,9 @@ public class ZipperTest {
 		
 	}
 	
-	/** ------------------------ main method test ----------------------*/	
+	/** ------------------------ main method tests ----------------------*/	
 	//@Test
 	public void testMain1() {
-		System.out.println("****************** main1");
 		String action = "zipper";
         String name = "testFolder";
         String newname = "ZIPME.zipper";
@@ -68,8 +65,6 @@ public class ZipperTest {
 		
 	//@Test
 	public void testMain3() {
-		System.out.println("****************** main3");
-
 		String action = "zipper";
         String name = "testDir";
         String newname = "testDir.zipper";
@@ -79,7 +74,6 @@ public class ZipperTest {
 	
 	//@Test
 	public void testMain4() {
-		System.out.println("****************** 2");
 		Zipper zipTest = new Zipper("FileToUnzip.txt", "UnZippedFolder");
 		assertTrue(zipTest.TOC.toString().contains("FileToUnzip"));
 	}
@@ -133,63 +127,68 @@ public class ZipperTest {
 		File f3 = new File("testFolder/level1-folder/level2-1.txt");
 		
 	}
-//	
-//	//@Test
-//	public void testProcessFile() {
-//		Zipper zip = new Zipper("testFolder", "Compressed.txt");
-//		File f = new File("testFolder/level1-2.txt");
-//		long oldCount = zip.totalCount;
-//		zip.processFile(f);
-//		assertTrue(zip.TOC.indexOf("testFolder/level1-2.txt,0") != -1);
-//		File g = new File("testFolder/level1-folder/level2-folder");
-//		zip.processFile(g);
-//		assertTrue(zip.TOC.indexOf("testFolder/level1-folder/level2-folder") != -1);
-	//}
-	
-	//@Test
-	public void testZip() {
-		System.out.println("****************** ziptest1");
-		Zipper zippity = new Zipper("testDir", "testDir123.zipper");
-		zippity.zip();
-//		System.out.println("toc now " + zippity.TOC);
-//		zippity.buildFile();
-//		zippity.buildTOC();
-//		System.out.println("toc after " + zippity.TOC);
-	}
 	
 	@Test
-	public void testEncodeFile() {
+	public void testFlatten() {
 		Zipper zip = new Zipper("testFolder", "Compressed.txt");
-		File f = new File("testFolder/level1-1.txt");
-		zip.encodeFile(f);
+		File f = new File("testFolder/");
+		ArrayList<File> flat = zip.flattenArrF(f);
+		File g = new File("testFolder/level1-folder/level2-folder");
+		assertTrue(!flat.isEmpty());
+		assertTrue(flat.contains(g));
+		File h = new File("testFolder/level1-folder/level2-folder");
+		assertTrue(flat.contains(h));		
+		File i = new File("testFolder/level1-folder/level2-folder/level3-2.txt");
+		assertTrue(flat.contains(i));
+		File j = new File("testFolder/level1-folder/level2-1.txt");
+		assertTrue(flat.contains(j));
 	}
 
 	@Test
 	public void testAddContents() {
 		Zipper zip = new Zipper("testFolder", "Compressed.txt");
 		File f = new File("testFolder/level1-1.txt");
+		assertTrue(zip.contents.length() == 0); 
 		zip.addContents(f);
-		assertTrue(zip.contents.indexOf("Two sturdy oaks") != -1);
+		assertTrue(zip.contents.length() >10);
 	}
-
+	
 	@Test
 	public void testMakeDir(){
 		Zipper zip = new Zipper("testFolder", "Compressed.txt");
 		ArrayList<File> pew = zip.makeDir(new File("testFolder/level1-folder/level2-folder"));
 		assertTrue(pew.size() != 0);
 	}
+
 	
+	@Test
+	public void testEncodeFile() {
+		Zipper zip = new Zipper("testFolder", "Compressed.txt");
+		File f = new File("testFolder/level1-1.txt");
+		zip.encodeFile(f);
+		assertFalse(f.length()==0);
+	}
+
 	@Test
 	public void testConcatAll() {
 		Zipper zip = new Zipper("testFolder/level1-folder", "Compressed.txt");
-		zip.contents.append("c");
-		int length = zip.TOC.length();
-		assertTrue(zip.TOC.length() == 29);
-		assertTrue(zip.contents.length() == 1);
-		StringBuilder all = zip.concatAll();
-		assertTrue(all.length() == length + zip.contents.length() + 1);
+		zip.TOC.append("YO");
+		zip.TOC.append("c");
+		zip.TOC.append("b");
+		zip.contents.append("1");
+		StringBuilder s = zip.concatAll();
+		assertTrue(s.toString().equals("YOcb\n1"));
+		
+	}
+
+	@Test
+	public void testTotalCount(){
+		Zipper zippity = new Zipper("testing.zipper", "yourmom");
+		assertTrue(zippity.totalCount==0);
+
 	}
 	
+	/** --------------------------- general testers -------------------- */
 	//@Test
 	public void testZIP() {
 		System.out.println("****************** zip3");
@@ -203,62 +202,21 @@ public class ZipperTest {
 		Zipper zippity = new Zipper("meowy699.zipper", "unzippedMEOY");
 		zippity.unzip();
 	}
-	
+		
 	//@Test
-	public void testHARD() {
+	public void testUnzipLayers() {
 		System.out.println("****************** zip4");
-		Zipper zippity = new Zipper("testFolder2", "lisaRequest");
-		zippity.zip();
-	}
-	/**
-	 * 
-	 */
-	//@Test
-	public void testWriteFile() {
-		System.out.println("****************** 4");
-		Zipper zippity = new Zipper("testFolder", "Comp1.zipper");
-		zippity.buildFile();
-		zippity.writeFile("Compressed.txt");
+		Zipper zippity = new Zipper("lisaRequest", "food");
+		zippity.unzip();
 	}
 	
-	//@Test
-	public void testCompress1File() {
-		System.out.println("****************** 5");
-		Zipper zip = new Zipper("testDir", "testDir1.zipper");
-		zip.buildFile();
-		zip.writeFile("testDir.zipper");
-	}
-	
-	
-	//@Test
-	public void testArrF(){
-		File blahFile = new File("blah");
-		Zipper zippity = new Zipper("blah", "derp");
-		System.out.println(zippity.getArrF());
-	}
-
-	
-	public void testTotalCount(){
-		// updated in processFile
-	}
-
-	
-	/** -------------------------- Unzip Testing ---------------------------- **/
-	
-	/**
-	 * test checks if the over all unzip method works with a Compressed.txt file 
-	 * that has empty directories, empty files and embedded files
-	 */
 	//@Test
 	public void testUnzip1(){
 		System.out.println("****************** unzip1");
 		Zipper zipTest = new Zipper("Compressed.txt", "testUnzip1");
 		zipTest.unzip();
 	}
-	/**
-	 * test checks if unzip method works with a smaller directory that only
-	 * contains one nested file with a small number of bytes. 
-	 */
+	
 	//@Test
 	public void testUnzip2(){
 		System.out.println("****************** unzip2");
@@ -272,36 +230,6 @@ public class ZipperTest {
 		Zipper zipTest = new Zipper("testDir.zipper", "testDestination3");
 		zipTest.unzip(); 
 		}
-	
-	
-	/**
-	 * Test checks how to Read the Table of Contents from a given compressed
-	 * file as input
-	 */
-	//@Test
-	public void testReadTOC2() {
-		System.out.println("****************** readTOC2");
-		Zipper zipTest = new Zipper("testDir.zipper", "testUnzip1");
-		File f = new File("testDir.zipper");
-		try {
-			File fi = new File("testDir.zipper");
-			FileReader fr = new FileReader(fi);
-			BufferedReader bf = new BufferedReader(fr);
-			assertTrue(zipTest.contentPath.isEmpty());
-			zipTest.readTOC(bf);
-			Zipper.WordEntry wdEntry1 = zipTest.getWordEntry("testDir/", -1);
-			Zipper.WordEntry wdEntry2 = zipTest.getWordEntry("testDir/file1", 0);
-			assertTrue(zipTest.contentPath.contains(wdEntry1));
-			assertTrue(zipTest.contentPath.contains(wdEntry2));
-			
-		} catch (FileNotFoundException e) {	}
-		
-	}
-	
-	/**
-	 * tests another thing
-	 */
-	
-	
+
 }
 
