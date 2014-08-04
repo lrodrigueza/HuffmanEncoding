@@ -22,7 +22,6 @@ public class Zipper {
      */
     public static void main (String[] args){
         String usage = "Usage: java Zipper zip|unzip source destination";
-        System.out.println("number of args is " + args.length);
         if (args.length > 3) {
             System.err.println(usage);
             System.exit(0);
@@ -138,7 +137,6 @@ public class Zipper {
             while(!(line = br.readLine()).equals("")){
                 String[] TOCline = line.split(",");
                 String key = makePath(TOCline[0]);
-                System.out.println("line is " + line);
                 
                 Integer value = Integer.parseInt(TOCline[1]);
                 WordEntry inQ = new WordEntry(key, value);
@@ -164,9 +162,8 @@ public class Zipper {
             Integer endHere = 0; 
             
             if(firstFile.value == -1) {
-            	File fu = new File(firstFile.key);
-            	if(fu.isDirectory()){
-            		System.out.println("It exists!");
+            	File fu = new File(this.dest + "/" + firstFile.key);
+            	if(fu.exists()){
                 	   File temp[] = fu.listFiles();
                 	   for (File fo : temp) {
                 		   fo.delete();
@@ -230,11 +227,7 @@ public class Zipper {
      * @param contents
      */
     protected void makeFile(String path, StringBuilder stuff){
-        System.out.println("contents in there " + stuff);
-        System.out.println("path is " + path);
-        
-        
-    	//else{
+       
         try {
     	File f = new File("tempZip");
         f.createNewFile();
@@ -252,8 +245,7 @@ public class Zipper {
         
         f.delete();
         } catch (IOException e) {}
-    	} 
-    //}
+    } 
 
     // implement Priority Queue (key is path, value is byte)
     protected String makePath(String given){
@@ -314,7 +306,6 @@ public class Zipper {
     // creates the table of contents and processes each file at the same time
     protected void buildFile(){
         ArrayList<File> newBuildArr = new ArrayList<File>();
-        System.out.println("arrF looks like " + arrF);
         
         
         for (File f : this.arrF) {
@@ -329,7 +320,6 @@ public class Zipper {
         		}
         		newBuildArr.add(child);
         	}
-        	System.out.println("flattened " + newBuildArr);
         }
         this.arrF=newBuildArr; 
         return;
@@ -340,13 +330,11 @@ public class Zipper {
         ArrayList<File> toRtn = new ArrayList<File>();
         if(f.isDirectory()){
             File[] dirList = f.listFiles();
-            //System.out.println("this is dir list when in directory " + dirList);
             if (dirList == null){
                 return toRtn; //There are no files in the directory
             }
             else{
                 for (File child : dirList){
-                    System.out.println("-------------" + child.toString());             
                     toRtn.add(child);
                     toRtn.addAll(flattenArrF(child));
                 }
@@ -358,13 +346,13 @@ public class Zipper {
     protected void buildTOC(){
     	for(File f: this.arrF){
     		TOC.append(f.getPath());
+    		TOC.append('/');
     		TOC.append(",");
     		if(f.isDirectory()){
                 TOC.append(-1);
     		}
     		else{
     			TOC.append(totalCount);
-    			System.out.println("file about to encode " + f);
     			if(f.length() == 0){
     				System.out.println("file is empty");
     			}
@@ -399,7 +387,6 @@ public class Zipper {
             while((thisLine = br.readLine()) != null){
                 contents.append(thisLine);
                 contents.append("\n");
-                System.out.println(thisLine);
             }
             contents.append("\n");
             int crntLength = contents.length();
@@ -426,13 +413,11 @@ public class Zipper {
     //adds the table of contents and the rest of the words together
     public StringBuilder concatAll(){
         TOC.append("\n");
-         System.out.println("CONTENTS ARE " + contents);
          TOC.append(contents);
          return TOC;
     }
     
     public void writeFile(String dest){
-    	System.out.println("writing now");
         try{
         	File f1 = new File(this.dest);
             if (!f1.exists()) {
@@ -440,11 +425,10 @@ public class Zipper {
             }
             FileWriter fw1 = new FileWriter(f1);
             String everything = concatAll().toString();
-            System.out.println(everything);
             fw1.write(everything);
             fw1.close();
             
-        }catch(IOException e){System.out.println("Something wrong with writeFile!");}
+        }catch(IOException e){}
     }
 
 
