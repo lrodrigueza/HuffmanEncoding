@@ -219,7 +219,7 @@ public class HuffmanEncoding {
             String fromCodehelperString = fromCodehelper.toString();
             // append to the newFileName with the fromCodehelper in binary
             FileOutputHelper.writeBinStrToFile(fromCodehelperString, newFileName);
-            
+            //f.delete();
         }
         catch(IOException e){
             return;

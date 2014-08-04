@@ -1,3 +1,5 @@
+
+
 import java.util.*;
 import java.io.*;
 
@@ -8,7 +10,6 @@ public class Zipper {
     private ArrayList<File> arrF = new ArrayList<File>();
     protected StringBuilder TOC = new StringBuilder();
     long totalCount = 0;
-    long sourceSize;
     protected StringBuilder contents = new StringBuilder();
     PriorityQueue<WordEntry> contentPath = new PriorityQueue<WordEntry>();
     
@@ -56,25 +57,25 @@ public class Zipper {
      * @param dest
      */
     public Zipper(String source, String dest){
-        this.dest = dest;
         this.source = source;
+        this.dest = dest;
+        
         File fileArg = new File(source);
-        sourceSize = fileArg.length();
+      
         if (fileArg.exists()){
             // Catch Zip when source is directory
             if (fileArg.isDirectory()){
-                TOC.append(fileArg.toString());
-                TOC.append("/,"); TOC.append(-1); TOC.append("\n");
+                this.arrF.add(fileArg);
                 this.arrF.addAll(makeDir(fileArg));
             // Catch UnZip when source if a file and dest is Directotry 
             } else {
-                File d = new File(this.dest);
-                d.mkdir();
+                //File d = new File(dest);
+                //d.mkdirs();
                 }
             }
         
         else{
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Source file doesn't exist");
         }
     }
     
@@ -88,7 +89,8 @@ public class Zipper {
      * the destination file. 
      */
     public void zip(){
-        buildFile(); 
+        buildFile();
+        buildTOC();
         writeFile(dest);
     }
     
@@ -109,6 +111,8 @@ public class Zipper {
             BufferedReader br = new BufferedReader(fr);
             readTOC(br);
             readFile();
+            br.close();
+            fr.close();
             } catch(IOException e){System.err.println("Something wrong with unzip!");}
     }
 
@@ -133,6 +137,7 @@ public class Zipper {
      * @param count
      */
     
+    
     protected void readTOC(BufferedReader br){
         try{
             String line;
@@ -144,8 +149,9 @@ public class Zipper {
                 Integer value = Integer.parseInt(TOCline[1]);
                 WordEntry inQ = new WordEntry(key, value);
                 contentPath.add(inQ);
-            }   
+            }
         } catch(IOException e){}
+        
         return;    
     }
 
@@ -225,7 +231,9 @@ public class Zipper {
         System.out.println("contents in there " + contents);
         System.out.println("path is " + path);
         
-            File f = new File("tempzo");
+            try {
+        	File f = new File("tempzo");
+            f.createNewFile();
             String restString = contents.toString();
             
             // append to the newFileName with the fromCodehelper in binary
@@ -239,6 +247,8 @@ public class Zipper {
             HuffmanEncoding.main(stringArray); 
             
             f.delete();
+            } catch (IOException e) {}
+            
     }
 
     // implement Priority Queue (key is path, value is byte)
@@ -298,70 +308,79 @@ public class Zipper {
      * @return
      */
     // creates the table of contents and processes each file at the same time
-    protected StringBuilder buildFile(){
+    protected void buildFile(){
         ArrayList<File> newBuildArr = new ArrayList<File>();
-        if(this.arrF.isEmpty()){
-            return TOC; 
+        System.out.println("arrF looks like " + arrF);
+        
+        
+        for (File f : this.arrF) {
+        	if (!newBuildArr.contains(f)) {
+        		newBuildArr.add(f);
+        	}
+        	
+        	ArrayList<File> possibleChildren = flattenArrF(f);
+        	for (File child : possibleChildren) {
+        		if (newBuildArr.contains(child)) {
+        			continue; 
+        		}
+        		newBuildArr.add(child);
+        	}
+        	System.out.println("flattened " + newBuildArr);
         }
-        else{
-            for (File f: this.arrF){
-                newBuildArr.addAll(processFile(f));
-            }
-            this.arrF.clear();
-        }
-        this.arrF.addAll(newBuildArr);
-        System.out.println(this.arrF.toString());
-        return buildFile();
+        this.arrF=newBuildArr; 
+        return;
     }
     
-    /**
-     * 
-     */
-    //updates the totalCount, keeping track of the byte at which file is written
-    //calls encode and stores in the contents thing for each file
-    protected ArrayList<File> processFile(File f){
-            ArrayList<File> newBuildArr = new ArrayList<File>();
-            TOC.append(f.getPath());
-            TOC.append(",");
-            if(f.isDirectory()){
-                TOC.append(-1);
-                File[] dirList = f.listFiles();
-                if (dirList == null){
-                    System.err.println("There are no files in the " + dirList + "directory.");
-                }
-                else{
-                    for (File child : dirList){
-                        System.out.println("-------------" + child.toString());
-                        newBuildArr.add(child); // returns an array of file Objects contained in this directory
-                    }
-                }
+    
+    protected ArrayList<File> flattenArrF(File f){
+        ArrayList<File> toRtn = new ArrayList<File>();
+        if(f.isDirectory()){
+            File[] dirList = f.listFiles();
+            //System.out.println("this is dir list when in directory " + dirList);
+            if (dirList == null){
+                return toRtn; //There are no files in the directory
             }
             else{
-                File t = encodeFile(f);
-                TOC.append(totalCount);
-                if (f.length() == 0){
-                    this.totalCount = totalCount + 1;
+                for (File child : dirList){
+                    System.out.println("-------------" + child.toString());             
+                    toRtn.add(child); // returns an array of file Objects contained in this directory
                 }
-                else{
-                    this.totalCount=totalCount+t.length();}
-                
             }
-            TOC.append("\n");
-            return newBuildArr;
+        }
+        return toRtn;
+}
+    
+    protected void buildTOC(){
+    	for(File f: this.arrF){
+    		TOC.append(f.getPath());
+    		TOC.append(",");
+    		if(f.isDirectory()){
+                TOC.append(-1);
+    		}
+    		else{
+    			TOC.append(totalCount);
+    			System.out.println("file about to encode " + f);
+    			if(f.length() == 0){
+    				System.out.println("file is empty");
+    			}
+    			encodeFile(f);
+    		}
+    		TOC.append("\n");
+    	}
     }
     
+   
     //encodes and adds to the contents StringBuilder for you
-    public File encodeFile(File f){
-        String action = "encode";
+    public void encodeFile(File f){
+    	String action = "encode";
         String name = f.toString();
         String newname = "temp";
         String[] stringArray = {action, name, newname};
         HuffmanEncoding.main(stringArray);    
-        
         File t = new File("temp");
-        
         addContents(t);
-        return t; 
+        t.delete();
+        return; 
     }
         
     
@@ -370,12 +389,16 @@ public class Zipper {
         try{
             FileReader fr = new FileReader(ff);
             BufferedReader br = new BufferedReader(fr);
-            String thisLine; 
+            String thisLine;
+            int previousLength = contents.length();
             while((thisLine = br.readLine()) != null){
                 contents.append(thisLine);
                 contents.append("\n");
+                System.out.println(thisLine);
             }
             contents.append("\n");
+            int crntLength = contents.length();
+            totalCount = totalCount + (crntLength - previousLength);
             br.close(); fr.close();
         }
         catch(IOException e){}
@@ -400,26 +423,30 @@ public class Zipper {
     //adds the table of contents and the rest of the words together
     public StringBuilder concatAll(){
         TOC.append("\n");
-        return TOC.append(contents);
+         //System.out.println("contents are " + contents);
+         TOC.append(contents);
+         return TOC;
     }
     
     public void writeFile(String dest){
-        File f = new File(dest);
         try{
+        	File f1 = new File(dest);
+
             
-            if (!f.exists()) {
-                f.createNewFile();
+            if (!f1.exists()) {
+                f1.createNewFile();
             }
             
-            FileWriter fw = new FileWriter(f);
-            BufferedWriter bw = new BufferedWriter(fw);
+            FileWriter fw1 = new FileWriter(f1);
+            BufferedWriter bw1 = new BufferedWriter(fw1);
             String everything = concatAll().toString();
-            fw.write(everything);
+            System.out.println("qwertyuiop " +everything);
+            fw1.write(everything);
             
-            bw.close();
-            fw.close();
+            bw1.close();
+            fw1.close();
             
-        }catch(IOException e){}
+        }catch(IOException e){System.out.println("ahooooooo!");}
     }
 
 
