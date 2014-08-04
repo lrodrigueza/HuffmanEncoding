@@ -99,7 +99,7 @@ public class ZipperTest {
 	@Test
 	public void testUnzipLayers() {
 		System.out.println("****************** zip4");
-		Zipper zippity = new Zipper("lisaRequest", "food");
+		Zipper zippity = new Zipper("tryToZipFood", "nom");
 		zippity.unzip();
 	}
 

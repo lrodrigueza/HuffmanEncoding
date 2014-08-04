@@ -87,7 +87,7 @@ public class Zipper {
     public void zip(){
         buildFile();
         buildTOC();
-        writeFile(dest);
+        writeFile(this.dest);
     }
     
     /**
@@ -100,6 +100,11 @@ public class Zipper {
      */
     public void unzip(){
         File f = new File(this.source);
+        File f2 = new File(this.dest);
+        if (!f2.exists()){
+        	f2.mkdirs();
+        	System.out.println(f2.getAbsolutePath());
+        }
         try{
             FileReader fr = new FileReader(f);
             BufferedReader br = new BufferedReader(fr);
@@ -162,7 +167,8 @@ public class Zipper {
             Integer endHere = 0; 
             
             if(firstFile.value == -1) {
-            	File fu = new File(this.dest + "/" + firstFile.key);
+            	String place = this.dest + "/" + firstFile.key;
+            	File fu = new File(place);
             	if(fu.exists()){
                 	   File temp[] = fu.listFiles();
                 	   for (File fo : temp) {
@@ -172,13 +178,13 @@ public class Zipper {
                 		   fu.delete();
                 		   }
             	}
-            	File f = new File(this.dest+ "/" + firstFile.key);
+            	File f = new File(place);
                 f.mkdirs();
             }
             
             else{
             	if (secondFile == null) {
-                endHere = 999999;
+                endHere = (int) totalCount;
             } else if(secondFile != null) {
                 endHere = secondFile.value;
             }
@@ -229,21 +235,26 @@ public class Zipper {
     protected void makeFile(String path, StringBuilder stuff){
        
         try {
-    	File f = new File("tempZip");
-        f.createNewFile();
-        String restString = stuff.toString();
-        
-        // append to the newFileName with the fromCodehelper in binary
-        FileOutputHelper2.writeBinStrToFile(restString, "tempZip");
-       
-        //calls the main method in HuffmanEncoding to decode each small file
-        String action = "decode";
-        String name = f.toString();
-        String newname = this.dest + "/" + path;
-        String[] stringArray = {action, name, newname};
-        HuffmanEncoding.main(stringArray); 
-        
-        f.delete();
+	    	File f = new File("tempZip");
+	        f.createNewFile();
+	        System.out.println(path);
+	        String restString = stuff.toString();
+	        String place = this.dest + "/" + path;
+	        
+	        File f2 = new File(place);
+	        if(!f2.exists()){
+	        	f2.createNewFile();}
+	        // append to the newFileName with the fromCodehelper in binary
+	        FileOutputHelper2.writeBinStrToFile(restString, "tempZip");
+	        
+	        //calls the main method in HuffmanEncoding to decode each small file
+	        String action = "decode";
+	        String name = f.toString();
+	        String newname = place;
+	        String[] stringArray = {action, name, newname};
+	        HuffmanEncoding.main(stringArray); 
+	        
+	        f.delete();
         } catch (IOException e) {}
     } 
 
@@ -417,9 +428,9 @@ public class Zipper {
          return TOC;
     }
     
-    public void writeFile(String dest){
+    public void writeFile(String path){
         try{
-        	File f1 = new File(this.dest);
+        	File f1 = new File(path);
             if (!f1.exists()) {
                 f1.createNewFile();
             }
@@ -470,7 +481,7 @@ public class Zipper {
                 output.write(toWrite);
                 output.close();
             } catch (FileNotFoundException e) {
-                System.err.printf("Can't find file %s", outputFileName);
+                System.err.printf("Whair is the output file %s", outputFileName);
             } catch (IOException e) {
                 System.err.println("Error with writing to output file");
             }

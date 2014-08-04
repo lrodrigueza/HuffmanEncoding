@@ -6,7 +6,7 @@ public class FileOutputHelper {
 
     // Length of outputStr must be multiple of 8;
     static void writeBinStrToFile(String outputStr, String outputFileName) {
-
+    	
         int strLen = outputStr.length();
         if (strLen % 8 != 0) {
             System.err
