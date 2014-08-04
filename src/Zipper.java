@@ -343,7 +343,8 @@ public class Zipper {
             else{
                 for (File child : dirList){
                     System.out.println("-------------" + child.toString());             
-                    toRtn.add(child); // returns an array of file Objects contained in this directory
+                    toRtn.add(child);
+                    toRtn.addAll(flattenArrF(child));
                 }
             }
         }
@@ -353,6 +354,7 @@ public class Zipper {
     protected void buildTOC(){
     	for(File f: this.arrF){
     		TOC.append(f.getPath());
+    		TOC.append('/');
     		TOC.append(",");
     		if(f.isDirectory()){
                 TOC.append(-1);
