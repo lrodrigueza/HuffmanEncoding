@@ -66,11 +66,9 @@ public class Zipper {
             // Catch Zip when source is directory
             if (fileArg.isDirectory()){
                 this.arrF.add(fileArg);
-                this.arrF.addAll(makeDir(fileArg));
+                //this.arrF.addAll(makeDir(fileArg));
             // Catch UnZip when source if a file and dest is Directotry 
             } else {
-                //File d = new File(dest);
-                //d.mkdirs();
                 }
             }
         
@@ -80,7 +78,6 @@ public class Zipper {
     }
     
     public Zipper() {};
-
     
     /**
      * This method is called from main if arg[0] is zipper. It then calls
@@ -104,9 +101,7 @@ public class Zipper {
      */
     public void unzip(){
         File f = new File(this.source);
-        
         try{
-            int count = 0;
             FileReader fr = new FileReader(f);
             BufferedReader br = new BufferedReader(fr);
             readTOC(br);
@@ -115,7 +110,6 @@ public class Zipper {
             fr.close();
             } catch(IOException e){System.err.println("Something wrong with unzip!");}
     }
-
     
     /**
     //--------------------------UNZIP METHODS----------------------------------//
@@ -187,10 +181,6 @@ public class Zipper {
                     break;                    
                 }
                 String toRtn = charIter.next();
-                int charCode = Integer.parseInt(toRtn, 2);
-    			String str = new Character((char) charCode).toString();
-    			currContent.append(toRtn);
-
                 count++;
             }
             makeFile(firstFile.key, currContent);
@@ -232,12 +222,12 @@ public class Zipper {
         System.out.println("path is " + path);
         
             try {
-        	File f = new File("tempzo");
+        	File f = new File("tempZip");
             f.createNewFile();
             String restString = contents.toString();
             
             // append to the newFileName with the fromCodehelper in binary
-            FileOutputHelper.writeBinStrToFile(restString, "tempzo");
+            FileOutputHelper.writeBinStrToFile(restString, "tempZip");
            
             //calls the main method in HuffmanEncoding to decode each small file
             String action = "decode";
@@ -343,7 +333,8 @@ public class Zipper {
             else{
                 for (File child : dirList){
                     System.out.println("-------------" + child.toString());             
-                    toRtn.add(child); // returns an array of file Objects contained in this directory
+                    toRtn.add(child);
+                    toRtn.addAll(flattenArrF(child));
                 }
             }
         }
@@ -413,7 +404,6 @@ public class Zipper {
         }
         else{
             for (File child : source.listFiles()){
-                System.out.println("-------------" + child.toString());
                 addThis.add(child); // returns an array of file Objects contained in this directory
             }
         }
@@ -423,7 +413,7 @@ public class Zipper {
     //adds the table of contents and the rest of the words together
     public StringBuilder concatAll(){
         TOC.append("\n");
-         //System.out.println("contents are " + contents);
+         System.out.println("contents are " + contents);
          TOC.append(contents);
          return TOC;
     }
@@ -431,22 +421,16 @@ public class Zipper {
     public void writeFile(String dest){
         try{
         	File f1 = new File(dest);
-
-            
             if (!f1.exists()) {
                 f1.createNewFile();
             }
             
             FileWriter fw1 = new FileWriter(f1);
-            BufferedWriter bw1 = new BufferedWriter(fw1);
             String everything = concatAll().toString();
-            System.out.println("qwertyuiop " +everything);
             fw1.write(everything);
-            
-            bw1.close();
             fw1.close();
             
-        }catch(IOException e){System.out.println("ahooooooo!");}
+        }catch(IOException e){System.out.println("Something wrong with writeFile!");}
     }
 
 

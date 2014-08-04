@@ -107,7 +107,7 @@ public class ZipperTest {
 	public void testBuildTOC() {
 		System.out.println("****************** 3");
 		Zipper zippity = new Zipper("testFolder", "meowy111.zipper");
-		zippity.buildFile();
+		//zippity.buildFile(zippity.getArrF());
 		zippity.buildTOC();
 		System.out.println(zippity.TOC);
 		//assertTrue(zippity.TOC.toString().contains("testFolder/level1-folder/level2-1.txt"));
@@ -128,10 +128,17 @@ public class ZipperTest {
 	}
 	
 	@Test
-	public void testHARD() {
+	public void testZipLayers() {
 		System.out.println("****************** zip4");
 		Zipper zippity = new Zipper("testFolder2", "lisaRequest");
 		zippity.zip();
+	}
+	
+	//@Test
+	public void testUnzipLayers() {
+		System.out.println("****************** zip4");
+		Zipper zippity = new Zipper("lisaRequest", "food");
+		zippity.unzip();
 	}
 	/**
 	 * 
@@ -140,7 +147,7 @@ public class ZipperTest {
 	public void testWriteFile() {
 		System.out.println("****************** 4");
 		Zipper zippity = new Zipper("testFolder", "Comp1.zipper");
-		zippity.buildFile();
+		//zippity.buildFile(zippity.getArrF());
 		zippity.writeFile("Compressed.txt");
 	}
 	
@@ -148,19 +155,19 @@ public class ZipperTest {
 	public void testCompress1File() {
 		System.out.println("****************** 5");
 		Zipper zip = new Zipper("testDir", "testDir1.zipper");
-		zip.buildFile();
+		//zip.buildFile(zip.getArrF());
 		zip.writeFile("testDir.zipper");
 	}
 	
 	
 	//@Test
 	public void testArrF(){
-		File blahFile = new File("blah");
+		//File blahFile = new File("blah");
 		Zipper zippity = new Zipper("blah", "derp");
 		System.out.println(zippity.getArrF());
 	}
 
-	
+	//@Test
 	public void testTotalCount(){
 		// updated in processFile
 	}
@@ -205,7 +212,6 @@ public class ZipperTest {
 	public void testReadTOC2() {
 		System.out.println("****************** readTOC2");
 		Zipper zipTest = new Zipper("testDir.zipper", "testUnzip1");
-		File f = new File("testDir.zipper");
 		try {
 			File fi = new File("testDir.zipper");
 			FileReader fr = new FileReader(fi);
